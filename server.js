@@ -56,19 +56,25 @@ async function getBrowser() {
   if (!browser || !browser.isConnected()) {
     const puppeteer = require('puppeteer');
     console.log('Launching new browser instance...');
-    browser = await puppeteer.launch({
-      headless: 'new',
-      args: [
-        '--no-sandbox',
-        '--disable-setuid-sandbox',
-        '--disable-dev-shm-usage',
-        '--disable-accelerated-2d-canvas',
-        '--no-first-run',
-        '--no-zygote',
-        '--single-process',
-        '--disable-gpu'
-      ]
-    });
+    // Explicitly download if missing (fallback)
+    try {
+        browser = await puppeteer.launch({
+          headless: 'new',
+          args: [
+            '--no-sandbox',
+            '--disable-setuid-sandbox',
+            '--disable-dev-shm-usage',
+            '--disable-accelerated-2d-canvas',
+            '--no-first-run',
+            '--no-zygote',
+            '--single-process',
+            '--disable-gpu'
+          ]
+        });
+    } catch (e) {
+        console.error('Failed to launch browser, trying to locate executable:', e);
+        throw e;
+    }
   }
   return browser;
 }
