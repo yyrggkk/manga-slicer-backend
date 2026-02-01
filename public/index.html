@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Ymanga - تحميل التطبيق</title>
+    <style>
+      :root {
+        --primary: #ff4d6d;
+        --bg: #0a0a0f;
+        --surface: #16162a;
+        --text: #ffffff;
+      }
+
+      body {
+        font-family:
+          system-ui,
+          -apple-system,
+          sans-serif;
+        background-color: var(--bg);
+        color: var(--text);
+        margin: 0;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        min-height: 100vh;
+        text-align: center;
+        padding: 20px;
+      }
+
+      .container {
+        background: var(--surface);
+        padding: 40px;
+        border-radius: 24px;
+        max-width: 400px;
+        width: 100%;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+        border: 1px solid rgba(255, 77, 109, 0.1);
+      }
+
+        .logo-img {
+            max-width: 250px;
+            width: 100%;
+            height: auto;
+            margin-bottom: 24px;
+            filter: drop-shadow(0 0 10px rgba(255, 77, 109, 0.2));
+        }
+
+      h1 {
+        margin: 0 0 10px;
+        font-size: 32px;
+        background: linear-gradient(45deg, #ff4d6d, #ff758f);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+      }
+
+      p {
+        color: #888;
+        line-height: 1.6;
+        margin-bottom: 30px;
+      }
+
+      .download-btn {
+        background: linear-gradient(to right, #ff4d6d, #c9184a);
+        color: white;
+        text-decoration: none;
+        padding: 16px 32px;
+        border-radius: 50px;
+        font-weight: bold;
+        font-size: 18px;
+        display: block;
+        transition:
+          transform 0.2s,
+          box-shadow 0.2s;
+        box-shadow: 0 4px 15px rgba(255, 77, 109, 0.4);
+      }
+
+      .download-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(255, 77, 109, 0.6);
+      }
+
+      .version {
+        margin-top: 20px;
+        font-size: 14px;
+        color: #555;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+        <img src="logo.png" alt="Ymanga Logo" class="logo-img">
+        <!-- <h1>Ymanga</h1> -->
+      <p>
+        أفضل تطبيق لقراءة المانجا العربية. تجربة قراءة سلسة، صور عالية الجودة،
+        وتحديثات يومية.
+      </p>
+
+      <!-- REPLACE '#' WITH YOUR ACTUAL APK LINK -->
+      <a href="https://expo.dev/artifacts/eas/2jtACmxCa7HQoYrB2xxHCv.apk" class="download-btn">🚀 تحميل التطبيق (APK)</a>
+
+      <div class="version">الإصدار 1.0.0 • Android</div>
+    </div>
+  </body>
+</html>

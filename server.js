@@ -41,9 +41,12 @@ setInterval(() => {
   }
 }, 60 * 1000);
 
-// Root endpoint for health check
+// Serve static files from public directory
+app.use(express.static('public'));
+
+// Root endpoint serves the download page
 app.get('/', (req, res) => {
-  res.send('Manga Slicer Service is Running! 🚀');
+  res.sendFile(__dirname + '/public/index.html');
 });
 
 app.get('/slice', async (req, res) => {
