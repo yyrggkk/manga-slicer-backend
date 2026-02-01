@@ -65,8 +65,16 @@ app.get('/slice', async (req, res) => {
       buffer = imageCache.get(url).buffer;
     } else {
       console.log(`Downloading new image: ${url}`);
-      const response = await fetch(url);
-      if (!response.ok) throw new Error(`Failed to fetch image: ${response.statusText}`);
+      
+      // Add headers to mimic a real browser
+      const headers = {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+        'Referer': 'https://mangatek.com/',
+        'Accept': 'image/avif,image/webp,image/apng,image/svg+xml,image/*,*/*;q=0.8'
+      };
+
+      const response = await fetch(url, { headers });
+      if (!response.ok) throw new Error(`Failed to fetch image: ${response.statusText} (${response.status})`);
       buffer = await response.buffer();
       
       // Save to cache
