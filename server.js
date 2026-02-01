@@ -77,7 +77,12 @@ app.get('/slice', async (req, res) => {
         'Origin': 'https://www.mangatek.com',
         'Sec-Fetch-Dest': 'image',
         'Sec-Fetch-Mode': 'no-cors',
-        'Sec-Fetch-Site': 'cross-site'
+        'Sec-Fetch-Site': 'cross-site',
+        'Sec-Ch-Ua': '"Google Chrome";v="123", "Not:A-Brand";v="8", "Chromium";v="123"',
+        'Sec-Ch-Ua-Mobile': '?0',
+        'Sec-Ch-Ua-Platform': '"Windows"',
+        'Cache-Control': 'no-cache',
+        'Pragma': 'no-cache'
       };
 
       const response = await fetch(url, { headers });
