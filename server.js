@@ -70,6 +70,7 @@ app.get('/slice', async (req, res) => {
       const headers = {
         'accept': 'image/avif,image/webp,image/apng,image/svg+xml,image/*,*/*;q=0.8',
         'accept-language': 'fr,fr-FR;q=0.9,en;q=0.8,en-GB;q=0.7,en-US;q=0.6,id;q=0.5',
+        'accept-encoding': 'identity', // Force uncompressed response
         'cache-control': 'no-cache',
         'pragma': 'no-cache',
         'priority': 'u=1, i',
@@ -85,7 +86,17 @@ app.get('/slice', async (req, res) => {
 
       const response = await fetch(url, { headers });
       if (!response.ok) throw new Error(`Failed to fetch image: ${response.statusText} (${response.status})`);
+      
+      // Buffer the entire response
       buffer = await response.buffer();
+
+      // Verify Content-Length if present
+      const expectedSize = response.headers.get('content-length');
+      if (expectedSize && buffer.length != expectedSize) {
+          console.warn(`Warning: Content-Length mismatch. Expected: ${expectedSize}, Received: ${buffer.length}`);
+           // Option: throw error if we want to be strict, or just log for now to see if it fixes it
+           // throw new Error('Incomplete download: Size mismatch');
+      }
       
       // Save to cache
       imageCache.set(url, { buffer, timestamp: Date.now() });
