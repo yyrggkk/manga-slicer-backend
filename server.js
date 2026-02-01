@@ -1,0 +1,148 @@
+const express = require('express');
+const sharp = require('sharp');
+const fetch = require('node-fetch');
+const cors = require('cors');
+const os = require('os');
+
+const app = express();
+const PORT = process.env.PORT || 3001;
+
+// Enable CORS for all origins
+app.use(cors());
+
+// Function to get local network IP address
+function getLocalIP() {
+  const interfaces = os.networkInterfaces();
+  for (const name of Object.keys(interfaces)) {
+    for (const iface of interfaces[name]) {
+      // Skip internal (loopback) and non-IPv4 addresses
+      if (iface.family === 'IPv4' && !iface.internal) {
+        return iface.address;
+      }
+    }
+  }
+  return 'localhost';
+}
+
+const LOCAL_IP = getLocalIP();
+const SLICE_HEIGHT = 1500; // Height of each slice in pixels
+
+// Simple in-memory cache
+const imageCache = new Map();
+const CACHE_TTL = 5 * 60 * 1000; // 5 minutes
+
+// Clean up old cache entries
+setInterval(() => {
+  const now = Date.now();
+  for (const [key, value] of imageCache.entries()) {
+    if (now - value.timestamp > CACHE_TTL) {
+      imageCache.delete(key);
+    }
+  }
+}, 60 * 1000);
+
+// Root endpoint for health check
+app.get('/', (req, res) => {
+  res.send('Manga Slicer Service is Running! 🚀');
+});
+
+app.get('/slice', async (req, res) => {
+  try {
+    const { url, index } = req.query;
+    
+    if (!url) {
+      return res.status(400).json({ error: 'Missing url parameter' });
+    }
+    
+    let buffer;
+
+    // 1. Check Cache First
+    if (imageCache.has(url)) {
+      console.log(`Using cached image: ${url}`);
+      buffer = imageCache.get(url).buffer;
+    } else {
+      console.log(`Downloading new image: ${url}`);
+      const response = await fetch(url);
+      if (!response.ok) throw new Error(`Failed to fetch image: ${response.statusText}`);
+      buffer = await response.buffer();
+      
+      // Save to cache
+      imageCache.set(url, { buffer, timestamp: Date.now() });
+    }
+    
+    // Get image metadata
+    const metadata = await sharp(buffer).metadata();
+    const { width, height } = metadata;
+    
+    // If index is provided, return specific slice
+    if (index !== undefined) {
+      const sliceIndex = parseInt(index);
+      const y = sliceIndex * SLICE_HEIGHT;
+      const sliceHeight = Math.min(SLICE_HEIGHT, height - y);
+      
+      if (y >= height) {
+        return res.status(404).json({ error: 'Slice index out of bounds' });
+      }
+      
+      console.log(`Extracting slice ${sliceIndex} (y: ${y}, height: ${sliceHeight})`);
+      
+      // Extract and return the slice
+      const slice = await sharp(buffer)
+        .extract({ left: 0, top: y, width: width, height: sliceHeight })
+        .jpeg({ quality: 90 })
+        .toBuffer();
+      
+      res.set('Content-Type', 'image/jpeg');
+      res.set('Cache-Control', 'public, max-age=31536000');
+      res.send(slice);
+    } else {
+      // Return slice info
+      const numSlices = Math.ceil(height / SLICE_HEIGHT);
+      const slices = [];
+      
+      // Determine the base URL
+      // If running on Render, RENDER_EXTERNAL_URL will be set
+      // Otherwise, fallback to local IP
+      let baseUrl;
+      if (process.env.RENDER_EXTERNAL_URL) {
+          baseUrl = `${process.env.RENDER_EXTERNAL_URL}`;
+          // Ensure no trailing slash
+          baseUrl = baseUrl.replace(/\/$/, '');
+      } else {
+          baseUrl = `http://${LOCAL_IP}:${PORT}`;
+      }
+      
+      for (let i = 0; i < numSlices; i++) {
+        const y = i * SLICE_HEIGHT;
+        const sliceHeight = Math.min(SLICE_HEIGHT, height - y);
+        
+        slices.push({
+          index: i,
+          url: `${baseUrl}/slice?url=${encodeURIComponent(url)}&index=${i}`,
+          y,
+          height: sliceHeight,
+          width
+        });
+      }
+      
+      res.json({
+        originalWidth: width,
+        originalHeight: height,
+        sliceHeight: SLICE_HEIGHT,
+        numSlices,
+        slices
+      });
+    }
+  } catch (error) {
+    console.error('Error:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+app.listen(PORT, '0.0.0.0', () => {
+  console.log(`\n🚀 Manga Slicer Backend running on port ${PORT}`);
+  console.log(`   Local:   http://localhost:${PORT}`);
+  if (!process.env.RENDER_EXTERNAL_URL) {
+      console.log(`   Network: http://${LOCAL_IP}:${PORT}`);
+  }
+});
