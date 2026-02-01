@@ -66,14 +66,21 @@ app.get('/slice', async (req, res) => {
     } else {
       console.log(`Downloading new image: ${url}`);
       
-      // Use exact headers from user's working browser (Edge on Android)
+      // Use exact headers from user's working browser (Edge on Android) including Cookie
       const headers = {
+        'accept': 'image/avif,image/webp,image/apng,image/svg+xml,image/*,*/*;q=0.8',
+        'accept-language': 'fr,fr-FR;q=0.9,en;q=0.8,en-GB;q=0.7,en-US;q=0.6,id;q=0.5',
+        'cache-control': 'no-cache',
+        'pragma': 'no-cache',
+        'priority': 'u=1, i',
         'sec-ch-ua': '"Not(A:Brand";v="8", "Chromium";v="144", "Microsoft Edge";v="144"',
         'sec-ch-ua-mobile': '?1',
         'sec-ch-ua-platform': '"Android"',
-        'Referer': 'https://mangatek.com/',
-        'User-Agent': 'Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Mobile Safari/537.36', // Inferred standard mobile UA
-        'Accept': 'image/avif,image/webp,image/apng,image/svg+xml,image/*,*/*;q=0.8'
+        'sec-fetch-dest': 'image',
+        'sec-fetch-mode': 'no-cors',
+        'sec-fetch-site': 'same-site',
+        'cookie': '_ga=GA1.1.1196933709.1769800398; _ga_W8MD69ZT8X=GS2.1.s1769964652$o5$g1$t1769965103$j20$l0$h0; cf_clearance=VFbE1efpHGOsn1aKTH6MqBg42PoxRbpiR1rb97G0Jm0-1769965103-1.2.1.1-tDi.AdpnTmRLiWswNdjQSLbUQpZA4Rp9HLm.pATl3uHrwQHO2et3kIsFp4D1qgGaUE0Lb13NiOn_kviqSIEBInWnNYzTJzySKxtbc626VfBQ3MQ7DGwfgmMttpLGzVg74wWVNpsKep7YyWTMxCVGvJbw54eJRz8ch1opwyp3a9EKDUwGaFcf3iq346634pEkxQNieG3x6NMzEgw_YSFzkexqCLNAt_cMESw86v7RHyg',
+        'Referer': 'https://mangatek.com/'
       };
 
       const response = await fetch(url, { headers });
