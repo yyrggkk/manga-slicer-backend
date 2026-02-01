@@ -71,12 +71,21 @@ app.get('/slice', async (req, res) => {
       const headers = {
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0.0.0 Safari/537.36',
         'Accept': 'image/avif,image/webp,image/apng,image/svg+xml,image/*,*/*;q=0.8',
-        'Referer': 'https://mangatek.com/',
-        'Accept-Language': 'en-US,en;q=0.9'
+        'Accept-Language': 'en-US,en;q=0.9',
+        'Connection': 'keep-alive',
+        'Referer': 'https://www.mangatek.com/',
+        'Origin': 'https://www.mangatek.com',
+        'Sec-Fetch-Dest': 'image',
+        'Sec-Fetch-Mode': 'no-cors',
+        'Sec-Fetch-Site': 'cross-site'
       };
 
       const response = await fetch(url, { headers });
-      if (!response.ok) throw new Error(`Failed to fetch image: ${response.statusText} (${response.status})`);
+      if (!response.ok) {
+        const errBody = await response.text();
+        console.error(`Remote Error Body (${response.status}):`, errBody.substring(0, 500));
+        throw new Error(`Failed to fetch image: ${response.statusText} (${response.status})`);
+      }
       
       // Buffer the entire response
       buffer = await response.buffer();
